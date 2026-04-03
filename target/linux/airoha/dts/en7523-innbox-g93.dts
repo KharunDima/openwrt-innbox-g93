@@ -1,0 +1,136 @@
+/dts-v1/;
+
+/ {
+    compatible = "econet,en7523";
+    model = "Innbox G93";
+    #address-cells = <2>;
+    #size-cells = <2>;
+
+    chosen {
+        bootargs = "console=ttyS0,115200n8 earlycon root=/dev/ram0";
+        stdout-path = "serial0:115200n8";
+    };
+
+    memory@80000000 {
+        device_type = "memory";
+        reg = <0x0 0x80000000 0x0 0x20000000>;
+    };
+
+    reserved-memory {
+        #address-cells = <2>;
+        #size-cells = <2>;
+        ranges;
+
+        atf_reserved: atf-reserved-memory@80000000 {
+            reg = <0x0 0x80000000 0x0 0x40000>;
+            no-map;
+        };
+
+        npu_binary: npu_binary@84000000 {
+            reg = <0x0 0x84000000 0x0 0x1000000>;
+            no-map;
+        };
+    };
+
+    cpus {
+        #address-cells = <2>;
+        #size-cells = <0>;
+
+        cpu@0 {
+            device_type = "cpu";
+            compatible = "arm,cortex-a53";
+            reg = <0x0 0x0>;
+            enable-method = "psci";
+            next-level-cache = <&l2_cache>;
+        };
+
+        cpu@1 {
+            device_type = "cpu";
+            compatible = "arm,cortex-a53";
+            reg = <0x0 0x1>;
+            enable-method = "psci";
+            next-level-cache = <&l2_cache>;
+        };
+    };
+
+    l2_cache: l2-cache0 {
+        compatible = "cache";
+    };
+
+    psci {
+        compatible = "arm,psci-0.2";
+        method = "smc";
+    };
+
+    timer {
+        compatible = "arm,armv8-timer";
+        interrupts = <1 13 4>, <1 14 4>, <1 11 4>, <1 10 4>;
+    };
+
+    interrupt-controller@09000000 {
+        compatible = "arm,gic-v3";
+        reg = <0x0 0x09000000 0x0 0x10000>, <0x0 0x09080000 0x0 0x200000>;
+        #interrupt-cells = <3>;
+        interrupt-controller;
+        interrupts = <1 9 4>;
+    };
+
+    soc {
+        compatible = "simple-bus";
+        #address-cells = <2>;
+        #size-cells = <2>;
+        ranges;
+
+        serial@1fbf0000 {
+            compatible = "econet,ecnt-uart1";
+            reg = <0x0 0x1fbf0000 0x0 0x100>;
+            interrupts = <0 94 4>;
+            clock-frequency = <25000000>;
+            status = "okay";
+        };
+
+        serial@1fbf0300 {
+            compatible = "econet,ecnt-uart2";
+            reg = <0x0 0x1fbf0300 0x0 0x100>;
+            interrupts = <0 95 4>;
+            status = "disabled";
+        };
+
+        gpio@1fbf0200 {
+            compatible = "econet,ecnt-gpio";
+            reg = <0x0 0x1fbf0200 0x0 0x100>;
+            interrupts = <0 96 4>;
+            gpio-controller;
+            #gpio-cells = <2>;
+        };
+
+        spi_controller@1fa10000 {
+            compatible = "econet,ecnt-spi_ctrl";
+            reg = <0x0 0x1fa10000 0x0 0x1000>;
+            #address-cells = <1>;
+            #size-cells = <0>;
+            status = "okay";
+
+            nand@0 {
+                compatible = "econet,ecnt-nand";
+                reg = <0>;
+                nand-ecc-mode = "hw";
+                nand-on-flash-bbt;
+            };
+        };
+
+        eth: frame_engine@1fb50000 {
+            compatible = "econet,ecnt-frame_engine";
+            reg = <0x0 0x1fb50000 0x0 0x10000>;
+            interrupts = <0 98 4>;
+            status = "okay";
+        };
+
+        pcie@1fa91000 {
+            compatible = "econet,ecnt-pcie";
+            reg = <0x0 0x1fa91000 0x0 0x1000>;
+            interrupts = <0 100 4>;
+            status = "okay";
+        };
+    };
+};

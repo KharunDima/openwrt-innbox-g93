@@ -1,0 +1,13 @@
+#!/bin/sh
+
+. /lib/airoha.sh
+. /lib/functions.sh
+
+board=$(airoha_board_detect)
+
+case "$board" in
+innbox-g93)
+	ucidef_set_interface_lan "lan"
+	ucidef_set_interface_wan "wan"
+	;;
+esac

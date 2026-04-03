@@ -1,0 +1,11 @@
+#!/bin/sh
+
+. /lib/airoha.sh
+
+board=$(airoha_board_detect)
+
+case "$board" in
+innbox-g93)
+	# Пока пусто, добавим позже когда узнаем GPIO светодиодов
+	;;
+esac
